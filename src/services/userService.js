@@ -74,17 +74,17 @@ let getAllUsers = (userId) => {
       let users = "";
       if (userId === "ALL") {
         users = await db.User.findAll({
-          attributes:{
-            exclude:['password']
-          }
+          attributes: {
+            exclude: ["password"],
+          },
         });
-      } 
-      if(userId&&userId!=='ALL') {
+      }
+      if (userId && userId !== "ALL") {
         users = await db.User.findOne({
           where: { id: userId },
-          attributes:{
-            exclude:['password']
-          }
+          attributes: {
+            exclude: ["password"],
+          },
         });
       }
       resolve(users);
@@ -92,102 +92,101 @@ let getAllUsers = (userId) => {
       reject(e);
     }
   });
-};  
+};
 
-let createNewUser=(data)=>{
-  return new Promise(async(resolve,reject)=>{
-    try{
-      let check=await checkUserEmail(data.email);
-      if(check===true){
-        resolve({
-          errCode:1,
-          message:"Your email is already in used"
-        })
-      }
-      let hashPasswordFromBcrypt = await hashUserPassword(data.password);
-      await db.User.create({
-        email: data.email,
-        password: hashPasswordFromBcrypt,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        address: data.address,
-        gender: data.gender === "1" ? true : false,
-        roleId: data.roleId,
-        phonenumber: data.phonenumber,
-      });
-      resolve({
-        errCode:0,
-        errMessage:'OK'
-      });
-    }catch(e){
-      reject(e);
-    }
-  })
-}
-
-
-let deleteUser=(userId)=>{
-  return new Promise(async(resolve,reject)=>{
-    let user=await db.User.findOne({
-      where:{id:userId}
-    })
-    if(!user){
-      resolve({
-        errCode:2,
-        errMessage:`The user isn't exist`
-      })
-
-    }
-    await db.User.destroy({
-      where:{id:userId}
-    });
-    resolve({
-      errCode:0,
-      message:'The user is deleted'
-    })
-  })
-}
-
-let updateUserData=(data)=>{
+let createNewUser = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if(!data.id){
+      let check = await checkUserEmail(data.email);
+      if (check === true) {
         resolve({
-          errCode:2,
-          errMessage:`Missing required parameter`
-        })
+          errCode: 1,
+          errMessage: "Your email is already in used",
+        });
+      } else {
+        let hashPasswordFromBcrypt = await hashUserPassword(data.password);
+        await db.User.create({
+          email: data.email,
+          password: hashPasswordFromBcrypt,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          address: data.address,
+          gender: data.gender === "1" ? true : false,
+          roleId: data.roleId,
+          phonenumber: data.phonenumber,
+        });
+        resolve({
+          errCode: 0,
+          errMessage: "OK",
+        });
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
+let deleteUser = (userId) => {
+  return new Promise(async (resolve, reject) => {
+    let user = await db.User.findOne({
+      where: { id: userId },
+    });
+    if (!user) {
+      resolve({
+        errCode: 2,
+        errMessage: `The user isn't exist`,
+      });
+    }
+    await db.User.destroy({
+      where: { id: userId },
+    });
+    resolve({
+      errCode: 0,
+      message: "The user is deleted",
+    });
+  });
+};
+
+let updateUserData = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!data.id) {
+        resolve({
+          errCode: 2,
+          errMessage: `Missing required parameter`,
+        });
       }
       let user = await db.User.findOne({
         where: { id: data.id },
-        raw: false  //Cần dùng nếu không user.save sẽ lỗi
+        raw: false, //Cần dùng nếu không user.save sẽ lỗi
       });
       if (user) {
         user.firstName = data.firstName;
         user.lastName = data.lastName;
         user.address = data.address;
         await user.save();
-          
+
         resolve({
-          errCode:0,
-          message:'Update user success'
+          errCode: 0,
+          message: "Update user success",
         });
       } else {
         resolve({
-          errCode:1,
-          errMessage:'user not found'
+          errCode: 1,
+          errMessage: "user not found",
         });
       }
     } catch (e) {
       console.log(e);
     }
   });
-}
+};
 
 module.exports = {
   handleUserLogin: handleUserLogin,
   checkUserEmail: checkUserEmail,
   getAllUsers: getAllUsers,
-  createNewUser:createNewUser,
-  deleteUser:deleteUser,
-  updateUserData:updateUserData,
+  createNewUser: createNewUser,
+  deleteUser: deleteUser,
+  updateUserData: updateUserData,
 };
