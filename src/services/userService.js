@@ -21,7 +21,7 @@ let handleUserLogin = (email, password) => {
       let isExist = await checkUserEmail(email);
       if (isExist) {
         let user = await db.User.findOne({
-          attributes: ["email", "roleId", "password"], //   Chỉ lấy tên email và roleid
+          attributes: ["email", "roleId", "password","firstName","lastName"], //   Chỉ lấy tên email và roleid
           where: { email: email },
           raw: true, //để user ở dạng object
         });
